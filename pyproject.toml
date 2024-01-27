@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "fopf-print-quantum"
+name = "quantum"
 version = "0.1.0"
 description = "Серверная часть проекта fopf-print"
 authors = ["cat-magician"]
@@ -9,8 +9,16 @@ readme = "README.md"
 python = "^3.11"
 pytest = "^7.4.4"
 pytest-asyncio = "^0.23.3"
+aiogram = "^3.3.0"
+click = "^8.1.7"
+mypy = "^1.8.0"
+flake8 = "^7.0.0"
+isort = "^5.13.2"
 
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+quantum = 'quantum.cli:cli'
