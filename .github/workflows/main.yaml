@@ -1,6 +1,6 @@
 name: Тестики
 
-run-name: ${{ github.actor }}
+run-name: ${{ github.event.head_commit.message }}
 
 on: [push]
 
