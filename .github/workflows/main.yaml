@@ -5,16 +5,27 @@ run-name: ${{ github.event.head_commit.message }}
 on: [push]
 
 jobs:
-  Explore-GitHub-Actions:
+  run-tests:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
+
+      - name: 🐍 Ставим питончик
+        uses: actions/setup-python@v5
+        with:
+          python-version: '^3.11'
+
+      - name: 📜 Ставим poetry
+        run: pip install --no-input poetry
+
       - name: 🛠️ Ставим зависимости
         run: poetry install
+
       - name: 🕵️‍♂️ Прогоняем линтеры
         run: |
           chmod +x hooks/pre-commit
           poetry run ./hooks/pre-commit
+
       - name: 📝 Запускаем тесты
         run: poetry run pytest tests
