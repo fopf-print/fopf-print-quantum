@@ -1,0 +1,20 @@
+name: Тестики
+
+run-name: ${{ github.actor }}
+
+on: [push]
+
+jobs:
+  Explore-GitHub-Actions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: 🛠️ Ставим зависимости
+        run: poetry install
+      - name: 🕵️‍♂️ Прогоняем линтеры
+        run: |
+          chmod +x hooks/pre-commit
+          poetry run ./hooks/pre-commit
+      - name: 📝 Запускаем тесты
+        run: poetry run pytest tests
