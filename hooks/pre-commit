@@ -1,0 +1,16 @@
+#!/bin/bash
+
+all_linters=(
+  'mypy --ignore-missing-imports src'
+  'flake8 src'
+  'isort --py auto --check --diff src'
+)
+
+for linter in "${all_linters[@]}"
+do
+  echo $linter
+  if ! eval $linter
+  then
+    exit 1
+  fi
+done
