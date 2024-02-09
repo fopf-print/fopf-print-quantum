@@ -1,6 +1,4 @@
 __pycache__
 .mypy_cache
-db/*.db
-
 # dev-local
 .envrc
