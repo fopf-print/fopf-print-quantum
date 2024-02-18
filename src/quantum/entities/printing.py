@@ -1,16 +1,17 @@
 from enum import Enum
+
 from pydantic import BaseModel, Field
 
 
 class PagesPerList(str, Enum):
-    one_list_per_page='one_list_per_page'
-    two_lists_per_page='two_lists_per_page'
-    four_lists_per_page='four_lists_per_page'
+    one_list_per_page = 'one_list_per_page'
+    two_lists_per_page = 'two_lists_per_page'
+    four_lists_per_page = 'four_lists_per_page'
 
 
 class SingleBothSides(str, Enum):
-    single_side_printing='single_side_printing'
-    both_sides_printing='both_sides_printing'
+    single_side_printing = 'single_side_printing'
+    both_sides_printing = 'both_sides_printing'
 
 
 class PrintingPolicy(BaseModel):
