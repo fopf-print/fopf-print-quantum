@@ -1,4 +1,5 @@
 import sqlite3
+from contextlib import asynccontextmanager
 from typing import Any, Iterable
 
 from quantum import settings
@@ -41,11 +42,6 @@ async def fetchall(sql: str, parameters: Iterable[Any] = ()) -> list[dict[str, A
     ]
 
 
-class transaction:
-    @classmethod
-    async def __aenter__(cls) -> object:  # mypy иди нафиг)
-        return _get_db()
-
-    @classmethod
-    async def __aexit__(cls, *args, **kwargs) -> None:  # похуй
-        pass
+@asynccontextmanager
+async def transaction():
+    yield _get_db()
