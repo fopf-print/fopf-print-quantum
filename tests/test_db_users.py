@@ -14,7 +14,7 @@ async def test_create_user_then_fetch(
         balance_cents=0,
     )
 
-    await db_users.create_new_user(test_user)
+    await db_users.upsert_user_info(test_user)
 
     user_from_db = await db_users.get_user_info(user_id)
 

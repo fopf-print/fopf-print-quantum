@@ -56,7 +56,6 @@ async def update_user_balance(user_id: int, balance_cents_delta: int) -> bool:
 
 
 async def get_user_info(user_id: int) -> users.User | None:
-
     info = next(
         iter(await db.fetchall('select * from users where id = ?', [user_id])),
         None
@@ -68,4 +67,3 @@ async def get_user_info(user_id: int) -> users.User | None:
     return users.User(
         **info
     )
-

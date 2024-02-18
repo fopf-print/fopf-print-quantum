@@ -7,6 +7,7 @@
 #  До тех самых пор наша очередь - это `list`)
 
 from collections import deque
+
 from quantum.entities.printing import PrintingTask
 
 # Ну а вот и сама очередь

@@ -43,9 +43,9 @@ async def fetchall(sql: str, parameters: Iterable[Any] = ()) -> list[dict[str, A
 
 class transaction:
     @classmethod
-    async def __aenter__() -> object:  # mypy иди нафиг)
+    async def __aenter__(cls) -> object:  # mypy иди нафиг)
         return _get_db()
 
     @classmethod
-    async def __aexit__(*args, **kwargs) -> None:  # похуй
+    async def __aexit__(cls, *args, **kwargs) -> None:  # похуй
         pass
