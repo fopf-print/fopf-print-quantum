@@ -1,7 +1,9 @@
 from quantum.entities import users
 from quantum.connectors import db_users
 
-async def test_create_user_then_fetch():
+async def test_create_user_then_fetch(
+        init_db
+):
     user_id = 123456
 
     test_user = users.User(
