@@ -1,7 +1,7 @@
 __pycache__
 .mypy_cache
-db/*.db
 .pytest_cache
+db/*.db
 
 # dev-local
 .envrc
