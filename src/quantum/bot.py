@@ -6,9 +6,10 @@ from aiogram.utils.markdown import hbold
 
 from quantum.connectors import db_users
 from quantum.core.bot_utils import user_identified
+from quantum.core.globals import Globals
 from quantum.entities.users import User
 
-fopf_print_bot = Dispatcher()
+fopf_print_bot = Globals[Dispatcher].get()
 
 
 class BalanceAction(CallbackData, prefix="balance"):
