@@ -2,6 +2,13 @@ from quantum.core import db
 from quantum.entities import users
 
 
+async def is_user_exists(user_id: int) -> bool:
+    return bool(next(
+        iter(await db.fetchall('select 1 from users where id = ?', [user_id])),
+        False,
+    ))
+
+
 async def get_user_info(user_id: int) -> users.User | None:
     info = next(
         iter(await db.fetchall('select * from users where id = ?', [user_id])),

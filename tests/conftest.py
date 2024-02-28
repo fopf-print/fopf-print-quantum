@@ -6,7 +6,7 @@ import mock_bot
 
 import aiogram
 
-from quantum.core.globals import Globals
+from quantum.core.globals import GlobalValue
 from quantum.entities import users
 
 
@@ -55,7 +55,7 @@ def default_tg_user_fixture() -> users.User:
         first_name='Марк',
         last_name='Новодачная',
         username='mark_novodachnaya',
-        balance_cents=500,
+        balance_cents=0,
     )
 
 
@@ -77,13 +77,13 @@ async def create_default_user_fixture(
 def bot_fixture(
         get_default_tg_user
 ):
-    Globals[aiogram.Dispatcher].set(
+    GlobalValue[aiogram.Dispatcher].set(
         mock_bot.MockDispatcher
     )
 
     # тут подтягиваем callback-и
     # сам модуль нам не нужен)
-    import quantum.bot
-    del quantum.bot
+    from quantum import bot
+    del bot
 
     return mock_bot.MockBot(default_user=get_default_tg_user())

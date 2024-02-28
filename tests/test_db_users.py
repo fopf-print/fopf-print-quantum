@@ -18,4 +18,4 @@ async def test_create_user_then_fetch(
 
     user_from_db = await db_users.get_user_info(user_id)
 
-    assert test_user == user_from_db
+    assert test_user.model_dump_json() == user_from_db.model_dump_json()

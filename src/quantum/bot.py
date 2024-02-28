@@ -5,37 +5,58 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
 from aiogram.utils.markdown import hbold
 
 from quantum.connectors import db_users
-from quantum.core.bot_utils import user_identified
-from quantum.core.globals import Globals
+from quantum.core.bot_utils import user_identified, user_registered
+from quantum.core.globals import GlobalValue
 from quantum.entities.users import User
+from quantum.services.balance import get_user_balance
+from quantum.services.users import create_user
 
-fopf_print_bot = Globals[Dispatcher].get()
+# mypy: disable-error-code="union-attr"
+# в aiogram много `smth | None`, которые зависят от usage-case-ов
+# поэтому забьём на это)))
+
+fopf_print_bot = GlobalValue[Dispatcher].get()
 
 
-class BalanceAction(CallbackData, prefix="balance"):
-    action: str
-    amount: int
-
+# Тут идут обработчики команд
+# Обработчики нажатий кнопок будут дальше внизу
 
 @fopf_print_bot.message(CommandStart())
 async def command_start_handler(message: types.Message):
-    """Отвечаем на /start"""
-    await message.answer(f"Hello, {hbold(message.from_user.full_name)}!")  # type: ignore[union-attr]
+    """
+    TODO: придумать и написать красивое welcome-сообщение
+    """
+    await message.answer(f"Hello, {hbold(message.from_user.full_name)}!")
+
+
+@fopf_print_bot.message(Command('register'))
+@user_identified
+async def command_register(message: types.Message):
+    await create_user(
+        User(
+            id=message.from_user.id,
+            first_name=message.from_user.first_name,
+            last_name=message.from_user.last_name,
+            username=message.from_user.username,
+        )
+    )
+    await message.reply('Done!)')
 
 
 @fopf_print_bot.message(Command('balance'))
 @user_identified
 async def command_balance(message: types.Message):
-    user_id = message.from_user.id  # type: ignore[union-attr]
-    # проверка на то, что это не None происходит в декораторе
-    # но mypy этого не умеет :plak:
-    # поэтому (чтоб он не матерился) пропишем ignore
-
-    user_info = await db_users.get_user_info(user_id)
-    balance = 0.0
-    if user_info is not None:
-        balance = user_info.balance_cents / 100
+    balance: float = (await get_user_balance(message.from_user.id)) or 0.0
     await message.answer(f'Ваш баланс: {balance} рубликов')
+
+
+# Теперь вот отсюда вниз идёт описание клавиатуры
+# В будущем может разнесём это на 2 отдельных файлика
+# Но пока вроде нормально и так)
+
+class BalanceAction(CallbackData, prefix="balance"):
+    action: str
+    amount: int
 
 
 @fopf_print_bot.message(Command("menu"))
@@ -51,13 +72,13 @@ async def show_menu(message: types.Message):
 
 
 @fopf_print_bot.message(F.text.lower() == 'проверить баланс')
-@user_identified
+@user_registered
 async def btn_check_balance(message: types.Message):
     await command_balance(message)
 
 
 @fopf_print_bot.message(F.text.lower() == 'пополнить баланс')
-@user_identified
+@user_registered
 async def btn_deposit(message: types.Message):
     builder = InlineKeyboardBuilder()
     builder.button(
@@ -82,7 +103,7 @@ async def btn_deposit(message: types.Message):
 
 
 @fopf_print_bot.callback_query(BalanceAction.filter(F.action == 'add'))
-@user_identified
+@user_registered
 async def send_random_value(callback: types.CallbackQuery, callback_data: BalanceAction, *args, **kwargs):
     amount = callback_data.amount
 
@@ -102,13 +123,13 @@ async def send_random_value(callback: types.CallbackQuery, callback_data: Balanc
 
     await db_users.update_user_balance(user_id, amount*100)
     user_info = await db_users.get_user_info(user_id)
-    await callback.message.answer(                                                       # type: ignore[union-attr]
-        f'Пополнение прошло успешно! Ваш новый баланс: {user_info.balance_cents / 100}'  # type: ignore[union-attr]
+    await callback.message.answer(
+        f'Пополнение прошло успешно! Ваш новый баланс: {user_info.balance_cents / 100}'
     )
     await callback.answer()
 
 
 @fopf_print_bot.message(F.text.lower() == 'распечатать штуку')
-@user_identified
+@user_registered
 async def btn_print(message: types.Message):
     await command_balance(message)

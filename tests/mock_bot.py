@@ -9,6 +9,7 @@ import pytest
 
 import aiogram
 
+from quantum.core.bot_utils import mb_propagate_exceptions
 from quantum.entities import users
 
 
@@ -23,28 +24,30 @@ class MockUser(users.User):
         return f'{self.first_name} {self.last_name}'
 
 
-class MockMessage:
-    def __init__(
-            self,
-            from_user: MockUser,
-            text: str | None = None,
-            message_id: int = 123,
-    ):
-        # сюда можно добавлять другие properties
-        # если обработчик требует больше
-        self.from_user = from_user
-        self.message_id = message_id
-        self.text = text
+class MockMessage(pydantic.BaseModel):
+    from_user: MockUser | None
+    message_id: int = pydantic.Field(default=123)
+    text: str | None = pydantic.Field(default=None)
 
-        # это не property, сюда сохраняются все ответы
-        self._reply: list[str] = []
+    # вот эта хрень для внешнего использования
+    answer_messages_contains: list[str]  = pydantic.Field(default_factory=lambda: [])
+    reply_messages_contains: list[str] = pydantic.Field(default_factory=lambda: [])
 
     # вот так симулируем ответ на сообщение
     async def answer(self, text: str, *args, **kwargs):
-        self._reply.append(text)
+        self.answer_messages_contains.append(text)
 
-    def get_reply(self):
-        return self._reply
+    async def reply(self, text: str, *args, **kwargs):
+        self.reply_messages_contains.append(text)
+
+    def get_result(self) -> "('reply', 'answer')":
+        return self.reply_messages_contains, self.answer_messages_contains
+
+
+def icheck(_, instance):
+    return type(instance) == MockMessage
+
+setattr(aiogram.types.Message.__class__, '__instancecheck__', icheck)
 
 
 class IgnoreShit(type):
@@ -81,7 +84,7 @@ class MockDispatcher(metaclass=IgnoreShit):
 
         def inner(func: typing.Callable[..., typing.Any]) -> typing.Callable[..., typing.Any]:
             _map[command] = func
-            return func  # да, у нас тут без других побочных действий
+            return func
         return inner
 
 
@@ -92,13 +95,15 @@ class MockBot:
         )
         self._map = MockDispatcher.cmd_2_handler_map
 
-    async def command(self, cmd: str, **kwargs) -> list[str]:
-        if 'from_user' not in kwargs:
-            kwargs['from_user'] = self.default_user
+    async def command(self, cmd: str, **kwargs) -> (list[str], list[str]):
+        defaults = {
+            'from_user': self.default_user
+        }
+        defaults.update(kwargs)
 
-        msg = MockMessage(text=cmd, **kwargs)
+        msg = MockMessage(text=cmd, **defaults)
 
-        await self._map[cmd](msg)
+        await mb_propagate_exceptions(self._map[cmd])(msg)
 
-        return msg.get_reply()
+        return msg.get_result()
 
