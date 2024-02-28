@@ -6,3 +6,5 @@ db/*.db
 # dev-local
 .envrc
 .idea
+.venv
+venv

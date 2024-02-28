@@ -6,13 +6,13 @@ T = typing.TypeVar('T', bound=object)
 
 
 class InstanceOrMock(typing.Generic[T]):
-    '''
+    """
     Да, это просто dict_element, который можно инициализировать.
 
     mypy не позволит запихать сюда значение не того типа, но, когда
     запускаются тесты, сюда будет пихаться заглушка. И, т.к. мы не 'натравляем'
     mypy на тетсы, всё будет ок из-за duck typing)
-    '''
+    """
     def __init__(self) -> None:
         self._instance: T | None = None
 
@@ -38,5 +38,5 @@ class _GlobalsMetaclass(type):
         return cls.storage[key]                       # type: ignore[attr-defined]
 
 
-class Globals(metaclass=_GlobalsMetaclass):
+class GlobalValue(metaclass=_GlobalsMetaclass):
     pass
