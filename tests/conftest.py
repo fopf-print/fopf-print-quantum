@@ -1,18 +1,50 @@
 import aiogram
+import asyncio
+import docker
 import pytest
 import mock_bot
 
 from typing import Any
 
 # сомнительно, но окей
+from quantum import settings
 from quantum.core import Postgres
 from quantum.core.globals import GlobalValue
 
 
+@pytest.fixture(autouse=True, scope='session', name='pg_container')
+async def pg_container_fixture():
+    port = 8956
+    env = {
+        'POSTGRES_DB': 'print',
+        'POSTGRES_USER': 'fopf',
+        'POSTGRES_PASSWORD': 'fopf',
+    }
+
+    client = docker.from_env()
+    postgres_container = client.containers.run(
+        'postgres:16',
+        environment=env,
+        ports={5432: port},
+        detach=True,
+    )
+
+    await asyncio.sleep(5)
+
+    if postgres_container.status != 'created':
+        raise RuntimeError('smth wrong with docker container')
+
+    yield postgres_container  # вообще тут можно что угодно
+
+    postgres_container.stop()
+    postgres_container.remove()
+
+
 @pytest.fixture(scope='function', name='db')
-def get_db_fixture():
-    uri = 'postgresql://fopf:password@127.0.0.1:5432/print'
-    return Postgres(uri)
+def get_db_fixture(
+        pg_container
+):
+    return Postgres(settings.POSTGRES_CONNECTION_URI)
 
 
 @pytest.fixture(autouse=True, scope='function', name='init_db')
