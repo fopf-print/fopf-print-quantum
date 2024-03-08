@@ -1,4 +1,4 @@
-create table if not exists users (
+create table users (
      id int primary key
     ,first_name text null
     ,last_name text null
@@ -8,7 +8,7 @@ create table if not exists users (
 ;
 
 
-create table if not exists payments (
+create table payments (
      id text -- не верь, это uuid4
     ,user_id int
     ,amount_cents int

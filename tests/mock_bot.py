@@ -89,9 +89,9 @@ class MockDispatcher(metaclass=IgnoreShit):
 
 
 class MockBot:
-    def __init__(self, default_user):
+    def __init__(self, default_user: dict):
         self.default_user = MockUser(
-            **default_user.model_dump()
+            **default_user
         )
         self._map = MockDispatcher.cmd_2_handler_map
 
