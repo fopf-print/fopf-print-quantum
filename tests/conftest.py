@@ -1,22 +1,53 @@
+import aiogram
 import asyncio
-import pydantic
+import docker
 import pytest
-
 import mock_bot
 
-import aiogram
+from typing import Any
 
+# сомнительно, но окей
+from quantum import settings
+from quantum.core import Postgres
 from quantum.core.globals import GlobalValue
-from quantum.entities import users
 
 
-@pytest.fixture(name='db')
-def get_db_fixture():
-    from quantum.core import db as actual_db
-    return actual_db
+@pytest.fixture(autouse=True, scope='session', name='pg_container')
+async def pg_container_fixture():
+    port = 8956
+    env = {
+        'POSTGRES_DB': 'print',
+        'POSTGRES_USER': 'fopf',
+        'POSTGRES_PASSWORD': 'fopf',
+    }
+
+    client = docker.from_env()
+    postgres_container = client.containers.run(
+        'postgres:16',
+        environment=env,
+        ports={5432: port},
+        detach=True,
+    )
+
+    await asyncio.sleep(5)
+
+    if postgres_container.status != 'created':
+        raise RuntimeError('smth wrong with docker container')
+
+    yield postgres_container  # вообще тут можно что угодно
+
+    postgres_container.stop()
+    postgres_container.remove()
 
 
-@pytest.fixture(autouse=True, name='init_db')
+@pytest.fixture(scope='function', name='db')
+def get_db_fixture(
+        pg_container
+):
+    return Postgres(settings.POSTGRES_CONNECTION_URI)
+
+
+@pytest.fixture(autouse=True, scope='function', name='init_db')
 async def init_db_fixture(
         db
 ):
@@ -25,9 +56,15 @@ async def init_db_fixture(
     with open(DATABASE_INIT_SCRIPT) as f:
         init_scripts = f.read()
 
-    await asyncio.gather(
-        *(db.execute(script) for script in init_scripts.split(';'))
-    )
+    cleanup_script = '''
+    drop schema public cascade;
+    create schema public;
+    grant all on schema public to fopf;
+    grant all on schema public to fopf;
+    '''
+
+    await db.execute(cleanup_script)
+    await db.execute(init_scripts)
 
 
 @pytest.fixture(name='create_user')
@@ -49,8 +86,8 @@ async def create_user_fixture(
 
 
 @pytest.fixture(name='get_default_tg_user')
-def default_tg_user_fixture() -> users.User:
-    return lambda : users.User(
+def default_tg_user_fixture() -> dict[str, Any]:
+    return lambda : dict(
         id=1,
         first_name='Марк',
         last_name='Новодачная',
@@ -67,7 +104,7 @@ async def create_default_user_fixture(
     user = get_default_tg_user()
 
     await create_user(
-        **user.dict()
+        **user()
     )
 
     return user.id

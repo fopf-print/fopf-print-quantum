@@ -4,6 +4,7 @@ __pycache__
 db/*.db
 
 # dev-local
+.python-version
 .envrc
 .idea
 .venv

@@ -1,4 +1,5 @@
 async def test_bot_register__unidentified(
+        init_db,
         bot,
 ):
     _, answer = await bot.command(
@@ -12,6 +13,7 @@ async def test_bot_register__unidentified(
 
 
 async def test_bot_register__success(
+        init_db,
         bot,
         get_default_tg_user,
         db,
@@ -26,4 +28,4 @@ async def test_bot_register__success(
 
     db_user = await db.fetchall('select * from users')
 
-    assert db_user == [user_info.model_dump()]
+    assert db_user == [user_info]
