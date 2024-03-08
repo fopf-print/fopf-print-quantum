@@ -1,6 +1,6 @@
-import asyncio
-import asyncpg
 from typing import Any, Iterable
+
+import asyncpg
 
 
 class Postgres:
@@ -13,12 +13,12 @@ class Postgres:
             self._db = await asyncpg.connect(self._uri)
 
     async def execute(self, sql: str, parameters: Iterable[Any] = ()):
-        await self._ensure_connected()
-        await self._db.execute(sql, *parameters)
+        await self._ensure_connected()            # вот тут проверяем, что оно не None
+        await self._db.execute(sql, *parameters)  # type: ignore[attr-defined]
 
     async def fetchall(self, sql: str, parameters: Iterable[Any] = ()) -> list[dict[str, Any]]:
-        await self._ensure_connected()
-        rows = await self._db.fetch(sql, *parameters)
+        await self._ensure_connected()                 # вот тут проверяем, что оно не None
+        rows = await self._db.fetch(sql, *parameters)  # type: ignore[attr-defined]
         return [dict(r) for r in rows]
 
     async def transaction(self):

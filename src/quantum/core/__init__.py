@@ -1,5 +1,6 @@
-from ._pg_connector_impl import Postgres
 from quantum import settings
+
+from ._pg_connector_impl import Postgres
 
 db = Postgres(settings.POSTGRES_CONNECTION_URI)
 
