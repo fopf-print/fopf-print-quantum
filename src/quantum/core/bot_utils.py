@@ -64,7 +64,7 @@ def user_identified(func: F) -> F:
         else:
             msg = typing.cast(types.Message, smth.message)
 
-        if msg.from_user is None:
+        if msg.chat.id is None:
             raise BusinessLogicFucked(msg=['USER_IS_UNIDENTIFIED'])
 
         await func(smth, *args, **kwargs)
@@ -96,7 +96,7 @@ def user_registered(func: F) -> F:
         else:
             msg = typing.cast(types.Message, smth.message)
 
-        if await cached_is_user_exists(msg.from_user.id):  # type: ignore[union-attr]
+        if await cached_is_user_exists(msg.chat.id):  # type: ignore[union-attr]
             await func(smth, *args, **kwargs)
             return
 

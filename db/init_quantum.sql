@@ -1,5 +1,5 @@
 create table users (
-     id int primary key
+     id bigint primary key
     ,first_name text null
     ,last_name text null
     ,username text null
@@ -7,9 +7,9 @@ create table users (
 )
 ;
 
-create table payments (
+create table payments_log (
      id uuid
-    ,user_id int
+    ,user_id bigint
     ,amount_cents int
     ,is_confirmed boolean
     ,transaction_dttm timestamp without time zone

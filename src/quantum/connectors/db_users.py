@@ -57,24 +57,3 @@ async def upsert_user_info(user_info: users.User) -> None:
             user_info.id,
         ]
     )
-
-
-async def update_user_balance(user_id: int, balance_cents_delta: int) -> bool:
-    async with db.transaction() as tr:
-        current_balance: int | None = next(
-            iter(await tr.execute('select balance from users where id = $1', [user_id])),
-            {'balance': None},
-        )['balance']
-
-        if current_balance is None:  # пользователь не существует
-            return False
-
-        if current_balance + balance_cents_delta < 0:  # недостаточно средств
-            return False
-
-        await tr.execute(
-            'update users set balance_cents = balance_cents + $1 where id = $2',
-            [balance_cents_delta, user_id]
-        )
-
-    return True
