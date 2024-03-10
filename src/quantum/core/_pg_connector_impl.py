@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from typing import Any, Iterable
 
 import asyncpg
@@ -21,5 +22,7 @@ class Postgres:
         rows = await self._db.fetch(sql, *parameters)  # type: ignore[attr-defined]
         return [dict(r) for r in rows]
 
+    @asynccontextmanager
     async def transaction(self):
-        raise RuntimeError('unimplemented :(')
+        await self._ensure_connected()  # вот тут проверяем, что оно не None
+        yield self._db.transaction()    # type: ignore[attr-defined]
