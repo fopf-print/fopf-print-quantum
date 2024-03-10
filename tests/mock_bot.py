@@ -24,9 +24,15 @@ class MockUser(users.User):
         return f'{self.first_name} {self.last_name}'
 
 
+class MockDocument(pydantic.BaseModel):
+    file_id: str
+    file_unique_id: str
+
+
 class MockMessage(pydantic.BaseModel):
     from_user: MockUser | None
     message_id: int = pydantic.Field(default=123)
+    document: MockDocument | None = pydantic.Field(default=None)
     text: str | None = pydantic.Field(default=None)
 
     # вот эта хрень для внешнего использования
@@ -45,7 +51,8 @@ class MockMessage(pydantic.BaseModel):
 
 
 def icheck(_, instance):
-    return type(instance) == MockMessage
+    return type(instance) is MockMessage
+
 
 setattr(aiogram.types.Message.__class__, '__instancecheck__', icheck)
 

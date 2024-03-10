@@ -118,9 +118,12 @@ def bot_fixture(
         mock_bot.MockDispatcher
     )
 
+    mbot = mock_bot.MockBot(default_user=get_default_tg_user())
+    GlobalValue[aiogram.Bot].set(mbot)
+
     # тут подтягиваем callback-и
     # сам модуль нам не нужен)
     from quantum import bot
     del bot
 
-    return mock_bot.MockBot(default_user=get_default_tg_user())
+    return mbot

@@ -1,4 +1,4 @@
-from aiogram import Dispatcher, F, types
+from aiogram import Bot, Dispatcher, F, types
 from aiogram.filters import Command, CommandStart
 from aiogram.filters.callback_data import CallbackData
 from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
@@ -9,12 +9,14 @@ from quantum.core.bot_utils import user_identified, user_registered
 from quantum.core.globals import GlobalValue
 from quantum.entities.users import User
 from quantum.services.balance import get_user_balance
+from quantum.services.printing import create_printing_task
 from quantum.services.users import create_user
 
 # mypy: disable-error-code="union-attr"
 # в aiogram много `smth | None`, которые зависят от usage-case-ов
 # поэтому забьём на это)))
 
+bot = GlobalValue[Bot].get()
 fopf_print_bot = GlobalValue[Dispatcher].get()
 
 
@@ -48,6 +50,20 @@ async def command_register(message: types.Message):
 async def command_balance(message: types.Message):
     balance: float = (await get_user_balance(message.from_user.id)) or 0.0
     await message.answer(f'Ваш баланс: {balance} рубликов')
+
+
+@fopf_print_bot.message(F.document)
+@user_registered
+async def document_for_print_handler(message: types.Message):
+    if not message.document.file_name.endswith('.pdf'):
+        await message.answer('пока умею печатать только pdf-ки :(')
+        return
+
+    await create_printing_task(
+        user_id=message.from_user.id,
+        message_id=message.message_id,
+        file_id=message.document.file_id,
+    )
 
 
 # Теперь вот отсюда вниз идёт описание клавиатуры

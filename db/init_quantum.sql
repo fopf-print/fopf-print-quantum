@@ -7,13 +7,22 @@ create table users (
 )
 ;
 
-
 create table payments (
-     id text -- не верь, это uuid4
+     id uuid
     ,user_id int
     ,amount_cents int
     ,is_confirmed boolean
-    ,transaction_dttm text -- не верь, это timestamp
+    ,transaction_dttm timestamp without time zone
     ,foreign key(user_id) references users(id)
 )
 ;
+
+create table printing_tasks (
+     id uuid
+    ,user_id int
+    ,message_id int
+    ,file_id text
+    ,status text
+    ,policy json null
+    ,foreign key(user_id) references users(id)
+);
