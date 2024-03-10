@@ -67,27 +67,31 @@ async def init_db_fixture(
     await db.execute(init_scripts)
 
 
-@pytest.fixture(name='create_user')
+@pytest.fixture(autouse=True, name='create_user')
 async def create_user_fixture(
-        _id: int,
-        first_name: str | None = None,
-        last_name: str | None = None,
-        username: str | None = None,
-        balance_cents: int = 0,
+        db,
 ):
-    await db.execute(
-        '''
-        insert into users values (?, ?, ?, ?, ?)
-        ''',
-        [
-            _id, first_name, last_name, username, balance_cents
-        ]
-    )
+    async def inner(
+            id: int,
+            first_name: str | None = None,
+            last_name: str | None = None,
+            username: str | None = None,
+            balance_cents: int = 0,
+    ):
+        await db.execute(
+            '''
+            insert into users values ($1, $2, $3, $4, $5)
+            ''',
+            [
+                id, first_name, last_name, username, balance_cents
+            ]
+        )
+    return inner
 
 
-@pytest.fixture(name='get_default_tg_user')
-def default_tg_user_fixture() -> dict[str, Any]:
-    return lambda : dict(
+@pytest.fixture(scope='session', name='get_default_tg_user')
+def default_tg_user_fixture():
+    return lambda: dict(
         id=1,
         first_name='Марк',
         last_name='Новодачная',
@@ -100,17 +104,19 @@ def default_tg_user_fixture() -> dict[str, Any]:
 async def create_default_user_fixture(
         create_user,
         get_default_tg_user,
-) -> int:
-    user = get_default_tg_user()
+):
+    async def inner():
+        user = get_default_tg_user()
 
-    await create_user(
-        **user()
-    )
+        await create_user(
+            **user
+        )
 
-    return user.id
+        return user['id']
+    return inner
 
 
-@pytest.fixture(name='bot')
+@pytest.fixture(scope='session', name='bot')
 def bot_fixture(
         get_default_tg_user
 ):
@@ -127,3 +133,11 @@ def bot_fixture(
     del bot
 
     return mbot
+
+
+@pytest.yield_fixture(scope='session')
+def event_loop(request):
+    """Create an instance of the default event loop for each test case."""
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    yield loop
+    loop.close()

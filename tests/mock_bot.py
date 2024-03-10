@@ -3,9 +3,9 @@
 #
 # Если будет полезно - можно будет попробовать
 
+import inspect
 import typing
 import pydantic
-import pytest
 
 import aiogram
 
@@ -24,6 +24,13 @@ class MockUser(users.User):
         return f'{self.first_name} {self.last_name}'
 
 
+class MockChat(pydantic.BaseModel):
+    id: int | None = pydantic.Field(default=None)
+    first_name: str | None = pydantic.Field(default=None)
+    last_name: str | None = pydantic.Field(default=None)
+    username: str | None = pydantic.Field(default=None)
+
+
 class MockDocument(pydantic.BaseModel):
     file_id: str
     file_unique_id: str
@@ -31,12 +38,13 @@ class MockDocument(pydantic.BaseModel):
 
 class MockMessage(pydantic.BaseModel):
     from_user: MockUser | None
+    chat: MockChat | None
     message_id: int = pydantic.Field(default=123)
     document: MockDocument | None = pydantic.Field(default=None)
     text: str | None = pydantic.Field(default=None)
 
     # вот эта хрень для внешнего использования
-    answer_messages_contains: list[str]  = pydantic.Field(default_factory=lambda: [])
+    answer_messages_contains: list[str] = pydantic.Field(default_factory=lambda: [])
     reply_messages_contains: list[str] = pydantic.Field(default_factory=lambda: [])
 
     # вот так симулируем ответ на сообщение
@@ -90,7 +98,12 @@ class MockDispatcher(metaclass=IgnoreShit):
         _map = cls.cmd_2_handler_map
 
         def inner(func: typing.Callable[..., typing.Any]) -> typing.Callable[..., typing.Any]:
-            _map[command] = func
+            if 'state' in inspect.signature(func).parameters:
+                async def wrapper(*args, **kwargs):
+                    return await func(*args, **kwargs, state=None)
+            else:
+                wrapper = func
+            _map[command] = wrapper
             return func
         return inner
 
@@ -104,9 +117,10 @@ class MockBot:
 
     async def command(self, cmd: str, **kwargs) -> (list[str], list[str]):
         defaults = {
-            'from_user': self.default_user
+            'from_user': self.default_user,
         }
         defaults.update(kwargs)
+        defaults['chat'] = (defaults['from_user'] and MockChat(**defaults['from_user'].model_dump())) or MockChat()
 
         msg = MockMessage(text=cmd, **defaults)
 

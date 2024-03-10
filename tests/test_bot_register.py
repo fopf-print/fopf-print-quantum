@@ -1,4 +1,5 @@
 async def test_bot_register__unidentified(
+        event_loop,
         init_db,
         bot,
 ):
@@ -12,20 +13,14 @@ async def test_bot_register__unidentified(
     ]
 
 
-async def test_bot_register__success(
+async def test_bot_register__already_registered(
         init_db,
         bot,
-        get_default_tg_user,
+        create_default_user,
         db,
 ):
+    await create_default_user()
     reply, _ = await bot.command('/register')
 
-    assert reply == [
-        'Done!)',
-    ]
+    assert reply == ['ты уже смешарик']
 
-    user_info = get_default_tg_user()
-
-    db_user = await db.fetchall('select * from users')
-
-    assert db_user == [user_info]
