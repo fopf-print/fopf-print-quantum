@@ -4,9 +4,9 @@ create table users (
     ,first_name text default null
     ,last_name text default null
     ,balance_cents int default 0
-    ,created_dt timestamp with time zone default (now() at time zone 'utc')
+    ,created_dttm timestamp with time zone default (now() at time zone 'utc')
     ,is_active boolean default false
-    ,activated_dt timestamp with time zone default null
+    ,activated_dttm timestamp with time zone default null
     ,role text default null
 )
 ;
