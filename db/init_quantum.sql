@@ -16,8 +16,6 @@ create table payments_log (
     ,yookassa_id uuid default null
     ,user_id bigint
     ,amount_cents int
-    ,before_cents int
-    ,after_cents int
     ,description text not null
     ,is_confirmed boolean
     ,transaction_dttm timestamp with time zone default (now() at time zone 'utc')
