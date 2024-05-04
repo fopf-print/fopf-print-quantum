@@ -23,6 +23,8 @@ create table printing_tasks (
     ,message_id int
     ,file_id text
     ,status text
+    ,created_dt timestamp with time zone default (now() at timestamp 'utc')
+    ,updated_dt timestamp with time zone default (now() at timestamp 'utc')
     ,policy json null
     ,foreign key(user_id) references users(id)
 );

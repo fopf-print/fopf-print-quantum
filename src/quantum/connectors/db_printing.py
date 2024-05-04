@@ -11,6 +11,6 @@ async def create_printing_task(user_id: int, message_id: int, file_id: str):
         values ($1, $2, $3, $4)
         ''',
         [
-            uuid4(), user_id, message_id, file_id, PrintingTaskStatus.new.value
+            uuid4(), user_id, message_id, file_id, PrintingTaskStatus.just_created
         ]
     )

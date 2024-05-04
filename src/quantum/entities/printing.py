@@ -1,11 +1,11 @@
-from enum import Enum
+from enum import StrEnum
 from uuid import UUID
 
 from pydantic import BaseModel, Field
 
 
-class PrintingTaskStatus(str, Enum):
-    new = 'new'
+class PrintingTaskStatus(StrEnum):
+    just_created = 'just_created'
     ready_to_pay = 'ready_to_pay'
     ready_to_convert = 'ready_to_convert'
     ready_to_print = 'ready_to_print'
@@ -13,18 +13,18 @@ class PrintingTaskStatus(str, Enum):
     failed = 'failed'
 
 
-class PagesPerList(str, Enum):
+class PagesPerList(StrEnum):
     one_page_per_list = 'one_page_per_list'
     two_pages_per_list = 'two_pages_per_list'
     four_pages_per_list = 'four_pages_per_list'
 
 
-class NSidedPrinting(str, Enum):
+class NSidedPrinting(StrEnum):
     single_sided = 'single_sided'
     double_sided = 'double_sided'
 
 
-class ColorPrinting(str, Enum):
+class ColorPrinting(StrEnum):
     black_and_white = 'black_and_white'
     more_colors = 'more_colors'
 
