@@ -1,18 +1,26 @@
 create table users (
      id bigint primary key
-    ,first_name text null
-    ,last_name text null
-    ,username text null
-    ,balance_cents int
+    ,username text not null
+    ,first_name text default null
+    ,last_name text default null
+    ,balance_cents int default 0
+    ,created_dt timestamp with time zone default (now() at time zone 'utc')
+    ,is_active boolean default false
+    ,activated_dt timestamp with time zone default null
+    ,role text default null
 )
 ;
 
 create table payments_log (
-     id uuid
+     id uuid primary key
+    ,yookassa_id uuid default null
     ,user_id bigint
     ,amount_cents int
+    ,before_cents int
+    ,after_cents int
+    ,description text not null
     ,is_confirmed boolean
-    ,transaction_dttm timestamp without time zone
+    ,transaction_dttm timestamp with time zone default (now() at time zone 'utc')
     ,foreign key(user_id) references users(id)
 )
 ;

@@ -31,9 +31,9 @@ deposit_inline_keyboard.add(
 router = Router()
 
 
-async def start(message: types.Message, state: FSMContext):
+async def start(message: types.Message, state: FSMContext, no_payment: bool = False):
     await state.clear()
-    await state.set_state(RefillFlow.refill_by_link)
+    await state.set_state(RefillFlow.refill_without_payment if no_payment else RefillFlow.refill_by_link)
 
     await message.answer(
         "Выберите сумму пополнения или введите свою чиселкой:",
