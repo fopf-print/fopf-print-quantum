@@ -1,4 +1,5 @@
 from quantum.core import db
+from quantum.core.exceptions import BusinessLogicFucked
 from quantum.entities import users
 
 
@@ -57,3 +58,46 @@ async def upsert_user_info(user_info: users.User) -> None:
             user_info.id,
         ]
     )
+
+
+async def _change_user_balance(user_id: int, balance_cents_increment: int) -> int:
+    """
+    Списываем у пользователя user_id balance_cents_delta.
+    Если balance_cents_delta < 0 то баланс будет пополнен
+
+    :returns: новый баланс пользователя
+    """
+    new_balance = await db.fetchall(
+        """
+        update users
+        set balance_cents = balance_cents + $2
+        where id = $1
+        returning balance_cents
+        """,
+        (user_id, balance_cents_increment),
+    )
+
+    if not new_balance or new_balance[0].get('balance_cents') is None:
+        raise BusinessLogicFucked(msg=['USER_IS_NOT_EXISTS'])
+
+    return int(new_balance[0]['balance_cents'])
+
+
+async def write_off_user_balance(user_id: int, amount_cents_delta: int) -> int:
+    """
+    Списываем у пользователя user_id balance_cents_delta.
+
+    :returns: новый баланс пользователя
+    """
+    assert amount_cents_delta > 0
+    return await _change_user_balance(user_id, -amount_cents_delta)
+
+
+async def refill_user_balance(user_id: int, amount_cents_delta: int) -> int:
+    """
+    Добавляем пользователю user_id balance_cents_delta на баланс
+
+    :returns: новый баланс пользователя
+    """
+    assert amount_cents_delta > 0
+    return await _change_user_balance(user_id, amount_cents_delta)

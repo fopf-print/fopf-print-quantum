@@ -1,4 +1,5 @@
-import uuid
+from datetime import UTC, datetime
+from uuid import uuid4
 
 from yookassa import Configuration, Payment
 from yookassa.payment import PaymentResponse
@@ -25,5 +26,15 @@ async def create_payment(value_cents: int, description: str | None = None) -> Pa
             'capture': True,
             'description': description,
         },
-        idempotency_key=uuid.uuid4(),
+        idempotency_key=uuid4(),
     )
+
+
+async def get_confirmed_payments(created_dttm_ge: datetime) -> list[PaymentResponse]:
+    dt: str = created_dttm_ge.astimezone(UTC).isoformat()
+    return Payment.list(
+        params={
+            'created_at.gt': dt,
+            'status': 'succeeded',
+        },
+    ).items

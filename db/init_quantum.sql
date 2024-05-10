@@ -11,7 +11,7 @@ create table users (
 )
 ;
 
-create table payments_log (
+create table payments (
      id uuid primary key
     ,yookassa_id uuid default null
     ,user_id bigint
@@ -22,15 +22,3 @@ create table payments_log (
     ,foreign key(user_id) references users(id)
 )
 ;
-
-create table printing_tasks (
-     id uuid
-    ,user_id int
-    ,message_id int
-    ,file_id text
-    ,status text
-    ,created_dt timestamp with time zone default (now() at timestamp 'utc')
-    ,updated_dt timestamp with time zone default (now() at timestamp 'utc')
-    ,policy json null
-    ,foreign key(user_id) references users(id)
-);
