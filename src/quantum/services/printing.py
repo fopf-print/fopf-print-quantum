@@ -8,6 +8,8 @@ from quantum.core import db
 from quantum.core.exceptions import BusinessLogicFucked
 from quantum.core.globals import GlobalValue
 from quantum.entities.printing import PrintingTask, PrintingTaskStatus
+from quantum.entities.web import CompletionStatus
+from quantum.services import client_notification
 
 
 async def calculate_cost(filepath: str) -> int:
@@ -85,3 +87,24 @@ async def try_get_next_task(printer_id: int) -> PrintingTask | None:
     # return
 
     return mb_task
+
+
+async def update_status_then_notify(task_id: UUID, status: CompletionStatus):
+    status_map: dict[CompletionStatus, PrintingTaskStatus] = {
+        CompletionStatus.success: PrintingTaskStatus.done,
+        CompletionStatus.failed: PrintingTaskStatus.failed,
+    }
+    await db_printing.set_task_status(printing_task_ids=[task_id], new_status=status_map[status])
+
+    task = await db_printing.get_by_id(printing_task_id=task_id)
+    if status == CompletionStatus.failed:
+        # TODO: надо спамить в техподдержку, а не в клиента
+        await client_notification.send_printing_failed(
+            user_id=task.user_id,
+            message_id=task.message_id,
+        )
+    else:
+        await client_notification.send_printing_complete(
+            user_id=task.user_id,
+            message_id=task.message_id,
+        )

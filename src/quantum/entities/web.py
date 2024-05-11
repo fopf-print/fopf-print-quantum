@@ -1,3 +1,4 @@
+from enum import StrEnum
 from typing import Self
 from uuid import UUID
 
@@ -21,3 +22,14 @@ class PrintingTaskWeb(BaseModel):
 
 class TryGetTaskResponse(BaseModel):
     task: PrintingTaskWeb | None = Field(description='возвращаем задачку, если нашли', default=None)
+
+
+class CompletionStatus(StrEnum):
+    success = 'success'
+    failed = 'failed'
+
+
+class SetTaskPrintingCompleteRequest(BaseModel):
+    task_id: UUID = Field(description='идентификатор таски')
+    status: CompletionStatus = Field(description='статус, с каким завершилась печать')
+    comment: str | None = Field(description='пояснение (при ошибке)', default=None)
