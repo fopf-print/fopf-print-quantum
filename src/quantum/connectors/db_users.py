@@ -101,3 +101,15 @@ async def refill_user_balance(user_id: int, amount_cents_delta: int) -> int:
     """
     assert amount_cents_delta > 0
     return await _change_user_balance(user_id, amount_cents_delta)
+
+
+async def check_if_enough_money(user_id: int, required_cents: int) -> bool:
+    _flg = await db.fetchall(
+        """
+        select balance_cents >= $2 as flg
+        from users
+        where id = $1
+        """,
+        (user_id, required_cents),
+    )
+    return _flg[0]['flg']

@@ -1,24 +1,24 @@
 from enum import StrEnum
 
-from aiogram.utils.keyboard import KeyboardButton, ReplyKeyboardBuilder
+from aiogram.utils.keyboard import KeyboardButton, ReplyKeyboardMarkup
 
 
 class MenuButtonsText(StrEnum):
-    print_thing = '🖨 Распечатать штуку'
+    print_thing = '🖨 Как напечатать штуку'
     check_balance = '🐖 Проверить баланс'
     add_balance = '💰 Пополнить баланс'
 
 
-menu_keyboard = ReplyKeyboardBuilder()
-menu_keyboard.add(
-    KeyboardButton(text=MenuButtonsText.print_thing),
-    KeyboardButton(text=MenuButtonsText.check_balance),
-    KeyboardButton(text=MenuButtonsText.add_balance),
+menu_keyboard = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text=MenuButtonsText.print_thing)],
+        [KeyboardButton(text=MenuButtonsText.check_balance), KeyboardButton(text=MenuButtonsText.add_balance)],
+    ],
+    resize_keyboard=False,
 )
-menu_keyboard.adjust(1)
 
 
-unregistered_user_menu_keyboard = ReplyKeyboardBuilder()
-unregistered_user_menu_keyboard.add(
-    KeyboardButton(text='/register')
+unregistered_user_menu_keyboard = ReplyKeyboardMarkup(
+    keyboard=[[KeyboardButton(text='/register')]],
+    resize_keyboard=False,
 )

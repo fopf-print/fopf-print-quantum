@@ -1,16 +1,24 @@
+import json
+from datetime import datetime
 from enum import StrEnum
+from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class PrintingTaskStatus(StrEnum):
-    just_created = 'just_created'
-    ready_to_pay = 'ready_to_pay'
-    ready_to_convert = 'ready_to_convert'
-    ready_to_print = 'ready_to_print'
-    printed = 'printed'
+    cost_calculating = 'cost_calculating'
+    parameters_input = 'parameters_input'
+    printing = 'printing'
+    done = 'done'
     failed = 'failed'
+    deleted = 'deleted'
+
+
+class PagesLimit(BaseModel):
+    page_from: int = Field(description='с какой страницы печатать')
+    page_to: int = Field(description='по какую страницу печатать')
 
 
 class PagesPerList(StrEnum):
@@ -19,43 +27,28 @@ class PagesPerList(StrEnum):
     four_pages_per_list = 'four_pages_per_list'
 
 
-class NSidedPrinting(StrEnum):
-    single_sided = 'single_sided'
-    double_sided = 'double_sided'
-
-
-class ColorPrinting(StrEnum):
-    black_and_white = 'black_and_white'
-    more_colors = 'more_colors'
-
-
-class PrintingPolicy(BaseModel):
-    page_from: int = Field(
-        description='с какой страницы печатать',
-        default=0,
-    )
-    page_to: int | None = Field(
-        description='по какую страницу печатать',
-        default=None,
-    )
-    lists_per_page: PagesPerList = Field(
-        description='сколько страниц на листе',
-        default=PagesPerList.one_page_per_list,
-    )
-    n_sides_printing: NSidedPrinting = Field(
-        description='печатаем ли на обеих сторонах листа',
-        default=NSidedPrinting.single_sided,
-    )
-    used_colors: ColorPrinting = Field(
-        description='цветная печать или черно-белая',
-        default=ColorPrinting.black_and_white,
-    )
+class PrintingParameters(BaseModel):
+    page_limits: PagesLimit | None = Field(description='обрезка страниц', default=None)
+    pages_per_list: PagesPerList = Field(description='сколько страниц на листе', default=PagesPerList.one_page_per_list)
+    double_sided_flg: bool = Field(description='двусторонняя печать', default=False)
+    color_printing_flg: bool = Field(description='цветная печать', default=False)
 
 
 class PrintingTask(BaseModel):
     id: UUID = Field(default='id-шник задачки на печать')
+    file_id: str = Field(description='id-шник файла')
     user_id: int = Field(description='id-шник пользователя')
     message_id: int = Field(description='id-шник сообщения, содержащего файл')
-    file_id: str = Field(description='id-шник файла')
-    status: PrintingTaskStatus = Field(description='статус таски')
-    policy: PrintingPolicy | None = Field(description='параметры печати')
+    cost_cents: int = Field(description='стоимость печати')
+    status: PrintingTaskStatus | None = Field(description='статус таски')
+    parameters: PrintingParameters | None = Field(description='параметры печати', default=None)
+    created_dttm: datetime | None = Field(description='время создания таски', default=None)
+    updated_dttm: datetime | None = Field(description='последнее время обновления статуса', default=None)
+
+    @field_validator('parameters', mode='before')
+    @classmethod
+    def parameters_validator(cls, parameters: Any):
+        if not isinstance(parameters, str):
+            return parameters
+
+        return PrintingParameters.model_validate(json.loads(parameters))

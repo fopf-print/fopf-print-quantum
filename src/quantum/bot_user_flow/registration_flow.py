@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import StrEnum
 
 from aiogram import Bot, Router, types
 from aiogram.filters.callback_data import CallbackData
@@ -16,7 +16,7 @@ from quantum.services.users import create_user
 # поэтому забьём на это)))
 
 
-class ChangeableUserProperty(str, Enum):
+class ChangeableUserProperty(StrEnum):
     firstname = 'firstname'
     lastname = 'lastname'
     group = 'group'
@@ -47,15 +47,15 @@ async def kb_builder(state: FSMContext):
     keyboard = InlineKeyboardBuilder()
     keyboard.add(
         InlineKeyboardButton(
-            text=f'Имя: {user_data[ChangeableUserProperty.firstname.value]}',
+            text=f'Имя: {user_data[ChangeableUserProperty.firstname]}',
             callback_data=UserPropertyChangeCallback(what=ChangeableUserProperty.firstname).pack(),
         ),
         InlineKeyboardButton(
-            text=f'Фамилия: {user_data[ChangeableUserProperty.lastname.value]}',
+            text=f'Фамилия: {user_data[ChangeableUserProperty.lastname]}',
             callback_data=UserPropertyChangeCallback(what=ChangeableUserProperty.lastname).pack(),
         ),
         InlineKeyboardButton(
-            text=f'Группа: {user_data[ChangeableUserProperty.group.value]}',
+            text=f'Группа: {user_data[ChangeableUserProperty.group]}',
             callback_data=UserPropertyChangeCallback(what=ChangeableUserProperty.group).pack(),
         ),
         InlineKeyboardButton(
@@ -84,9 +84,9 @@ async def start(message: types.Message, state: FSMContext):
     await state.set_state(RegistrationFlow.registration_in_process)
     await state.update_data(
         {
-            ChangeableUserProperty.firstname.value: message.chat.first_name,
-            ChangeableUserProperty.lastname.value: message.chat.last_name,
-            ChangeableUserProperty.group.value: '<номер группы>',
+            ChangeableUserProperty.firstname: message.chat.first_name,
+            ChangeableUserProperty.lastname: message.chat.last_name,
+            ChangeableUserProperty.group: '<номер группы>',
         }
     )
 
@@ -152,5 +152,5 @@ async def do_registration_callback(
 
     await callback.message.reply(
         'по идее готово',
-        reply_markup=menu_keyboard.as_markup(resize_keyboard=True),
+        reply_markup=menu_keyboard,
     )

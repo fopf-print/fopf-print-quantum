@@ -7,3 +7,5 @@ POSTGRES_CONNECTION_URI = 'postgresql://fopf:vdAKsiEZDKr2akjVD9mi@127.0.0.1:5432
 REDIRECT_AFTER_PAYMENT_URL = 'https://www.example.com/'
 
 REFILL_WORKER_DELAY_SEC = 15
+
+FILESTORAGE_PATH = '/path/to/unexisting/folder/'
