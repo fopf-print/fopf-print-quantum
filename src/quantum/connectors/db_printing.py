@@ -35,6 +35,7 @@ async def get_by_status(status: PrintingTaskStatus) -> list[PrintingTask]:
              id
             ,file_id
             ,user_id
+            ,message_id
             ,cost_cents
             ,status
             ,parameters
@@ -49,6 +50,35 @@ async def get_by_status(status: PrintingTaskStatus) -> list[PrintingTask]:
     )
 
     return [PrintingTask.model_validate(t) for t in tasks]
+
+
+async def try_get_next_task(printer_id: int) -> PrintingTask | None:
+    tasks = await db.fetchall(
+        """
+        select
+             id
+            ,file_id
+            ,user_id
+            ,message_id
+            ,cost_cents
+            ,status
+            ,parameters
+            ,created_dttm
+            ,updated_dttm
+        from
+            printing_tasks
+        where
+            status = 'printing'
+            -- and printer_id = $1
+        order by
+            created_dttm asc
+        limit 1
+        """,
+    )
+
+    if tasks:
+        return PrintingTask.model_validate(tasks[0])
+    return None
 
 
 async def set_task_status(printing_task_ids: list[UUID], new_status: PrintingTaskStatus):

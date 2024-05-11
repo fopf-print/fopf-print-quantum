@@ -7,7 +7,7 @@ from quantum.connectors import db_printing, db_users
 from quantum.core import db
 from quantum.core.exceptions import BusinessLogicFucked
 from quantum.core.globals import GlobalValue
-from quantum.entities.printing import PrintingTaskStatus
+from quantum.entities.printing import PrintingTask, PrintingTaskStatus
 
 
 async def calculate_cost(filepath: str) -> int:
@@ -62,3 +62,26 @@ async def schedule_printing(printing_task_id: UUID):
             chat_id=printing_task.user_id,
             reply_to_message_id=printing_task.message_id,
         )
+
+
+async def try_get_next_task(printer_id: int) -> PrintingTask | None:
+    """
+    Пытаемся получить таску для печати и проверяем, что файл можно скачать
+    """
+
+    mb_task: PrintingTask | None = await db_printing.try_get_next_task(printer_id)
+
+    if mb_task is None:
+        return None
+
+    # если файл есть в /tmp (да, это лучшее, что я придумал)
+    #   return
+
+    # если файл есть на диске
+    #   cp /path/to/drive/file-id.pdf /tmp/.
+    #   return
+
+    # скачиваем файл из тг в /tmp/file-id.pdf
+    # return
+
+    return mb_task
