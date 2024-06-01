@@ -70,11 +70,18 @@ async def print_printing_parameters(state: FSMContext):
     data = await state.get_data()
     chat_id: int | str = data['chat_id']
     message_id: int = data['message_id']
+    task_id: UUID = data['printing_task_id']
+
+    printing_cost_cents = await printing.calculate_cost(task_id)
+    printing_cost_fmt = '{:.2f}'.format(printing_cost_cents / 100)
 
     await bot.send_message(
         chat_id=chat_id,
         reply_to_message_id=message_id,
-        text='Настрой параметры и отправь на печать',
+        text=(
+            'Настрой параметры и отправь на печать\n'
+            f'стоимость: {printing_cost_fmt}'
+        ),
         reply_markup=(await kb_builedr(state)).as_markup(),
     )
 

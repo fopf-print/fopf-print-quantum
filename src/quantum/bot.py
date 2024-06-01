@@ -23,10 +23,6 @@ fopf_print_bot.include_routers(registration_flow.router)
 fopf_print_bot.include_routers(set_printing_parameters_flow.router)
 
 
-class BalanceAddFlow(StatesGroup):
-    input_amount = State()
-
-
 # Тут идут обработчики команд
 # Обработчики нажатий кнопок будут дальше внизу
 
@@ -110,3 +106,9 @@ async def btn_print(message: types.Message):
 @user_registered
 async def btn_check_balance(message: types.Message):
     await show_balance_handler(message)
+
+
+@fopf_print_bot.message(F.text == keyboards.MenuButtonsText.add_balance.value)
+@user_registered
+async def btn_add_balance(message: types.Message, state: FSMContext):
+    await refill_balance_flow.start(message, state)

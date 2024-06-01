@@ -5,24 +5,29 @@ import asyncpg
 
 
 class Postgres:
+    __slots__ = ['_uri']
+
     def __init__(self, uri: str):
-        self._db = None
         self._uri = uri
 
+    @asynccontextmanager
     async def _ensure_connected(self):
-        if self._db is None:
-            self._db = await asyncpg.connect(self._uri)
+        con = await asyncpg.connect(self._uri)
+        try:
+            yield con
+        finally:
+            await con.close()
 
     async def execute(self, sql: str, parameters: Iterable[Any] = ()):
-        await self._ensure_connected()            # вот тут проверяем, что оно не None
-        await self._db.execute(sql, *parameters)  # type: ignore[attr-defined]
+        async with self._ensure_connected() as con:
+            await con.execute(sql, *parameters)  # type: ignore[attr-defined]
 
     async def fetchall(self, sql: str, parameters: Iterable[Any] = ()) -> list[dict[str, Any]]:
-        await self._ensure_connected()                 # вот тут проверяем, что оно не None
-        rows = await self._db.fetch(sql, *parameters)  # type: ignore[attr-defined]
+        async with self._ensure_connected() as con:
+            rows = await con.fetch(sql, *parameters)  # type: ignore[attr-defined]
         return [dict(r) for r in rows]
 
     @asynccontextmanager
     async def transaction(self):
-        await self._ensure_connected()  # вот тут проверяем, что оно не None
-        yield self._db.transaction()    # type: ignore[attr-defined]
+        async with self._ensure_connected() as con:
+            yield con.transaction()    # type: ignore[attr-defined]

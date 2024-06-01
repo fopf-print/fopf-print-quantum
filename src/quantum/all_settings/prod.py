@@ -2,10 +2,16 @@ YOOKASSA_API_ENDPOINT = 'https://api.yookassa.ru/v3/'
 
 FOPF_PRINT_BOT_TOKEN = '6584351083:AAEzj1bhJPTwBnnmMsA4bsBs1J9G2CDMYys'
 
-POSTGRES_CONNECTION_URI = 'postgresql://fopf:vdAKsiEZDKr2akjVD9mi@127.0.0.1:5432/print'
+# сервачек с тестовой бд-шкой
+POSTGRES_CONNECTION_URI = 'postgresql://fopf:3hnZ2zxE5dQPJ48nhAUjHcGBWf1dLrdR@185.231.153.216:8956/print'
 
-REDIRECT_AFTER_PAYMENT_URL = 'https://www.example.com/'
+REDIRECT_AFTER_PAYMENT_URL = 'https://t.me/ddprivate_bot'
 
 REFILL_WORKER_DELAY_SEC = 15
 
 FILESTORAGE_PATH = '/path/to/unexisting/folder/'
+<<<<<<< Updated upstream
+=======
+
+COST_PER_PAGE_CENTS = 150  # 1.50руб / стр
+>>>>>>> Stashed changes

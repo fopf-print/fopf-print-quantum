@@ -1,3 +1,5 @@
+import logging
+import subprocess
 from uuid import UUID
 
 from aiogram import Bot
@@ -12,8 +14,32 @@ from quantum.entities.web import CompletionStatus
 from quantum.services import client_notification
 
 
-async def calculate_cost(filepath: str) -> int:
-    return 420
+logger = logging.getLogger(__name__)
+
+
+def _get_file_path_by_task_id(task_id: UUID):
+    return f'{settings.FILESTORAGE_PATH}/{task_id}.pdf'
+
+
+def _get_number_of_pages(filepath: str) -> int:
+    out = subprocess.getoutput(f'pdftk {filepath} dump_data | grep NumberOfPages')
+    try:
+        return int(out.split(' ')[1])
+    except Exception:  # похуй
+        logger.exception('не получилось посчитать количество страниц для файла %s ; получили: %s', filepath, out)
+    return -1
+
+
+async def calculate_cost(task_id: UUID) -> int:
+    filepath = _get_file_path_by_task_id(task_id)
+    pages_amount = _get_number_of_pages(filepath)
+    if pages_amount == -1:
+        pages_amount = _get_number_of_pages(filepath)
+
+    if pages_amount == -1:
+        raise BusinessLogicFucked(msg=['COST_CALCULATION_ERROR'])
+
+    return pages_amount * settings.COST_PER_PAGE_CENTS
 
 
 async def process_file(user_id: int, file_id: str, message_id: int) -> UUID:
@@ -22,6 +48,7 @@ async def process_file(user_id: int, file_id: str, message_id: int) -> UUID:
 
     :param int user_id: айдишник пользователя
     :param str file_id: идентификатор файла из aiogram
+    :param int message_id: айдишник сообщения с файлом
     :returns: стоимость печати
     """
     task = await db_printing.create_printing_task(user_id, file_id, message_id)
@@ -31,10 +58,10 @@ async def process_file(user_id: int, file_id: str, message_id: int) -> UUID:
     if file.file_path is None:
         raise BusinessLogicFucked(msg=['FILE_GETTING_ERROR'])
 
-    downloaded_file_path = f'{settings.FILESTORAGE_PATH}/{task.id}.pdf'
+    downloaded_file_path = _get_file_path_by_task_id(task.id)
     await bot.download_file(file_path=file.file_path, destination=downloaded_file_path)
 
-    cost_cents = await calculate_cost(downloaded_file_path)
+    cost_cents = await calculate_cost(task.id)
     await db_printing.set_printing_cost(task.id, cost_cents)
 
     await db_printing.set_task_status([task.id], PrintingTaskStatus.parameters_input)
@@ -47,7 +74,7 @@ async def schedule_printing(printing_task_id: UUID):
     printing_task = await db_printing.get_by_id(printing_task_id)
 
     async with db.transaction():
-        if not db_users.check_if_enough_money(printing_task.user_id, printing_task.cost_cents):
+        if not await db_users.check_if_enough_money(printing_task.user_id, printing_task.cost_cents):
             await bot.send_message(
                 text='нужно больше злотых',
                 chat_id=printing_task.user_id,
