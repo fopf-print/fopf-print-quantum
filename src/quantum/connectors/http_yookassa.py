@@ -6,8 +6,8 @@ from yookassa.payment import PaymentResponse
 
 from quantum import settings
 
-Configuration.account_id = settings.YOOKASSA_SHOP_ID
-Configuration.secret_key = settings.YOOKASSA_API_KEY
+Configuration.account_id = settings.yookassa_shop_id
+Configuration.secret_key = settings.yookassa_api_key
 
 
 async def create_payment(value_cents: int, description: str | None = None) -> PaymentResponse:
@@ -21,7 +21,7 @@ async def create_payment(value_cents: int, description: str | None = None) -> Pa
             # TODO: сделать нормально (тут редирект не нужен)
             'confirmation': {
                 'type': 'redirect',
-                'return_url': settings.REDIRECT_AFTER_PAYMENT_URL,
+                'return_url': settings.redirect_after_payment_url,
             },
             'capture': True,
             'description': description,

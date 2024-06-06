@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 def fopf_print_bot_worker() -> None:
-    GlobalValue[Bot].set(Bot(settings.FOPF_PRINT_BOT_TOKEN, parse_mode=ParseMode.HTML))
+    GlobalValue[Bot].set(Bot(settings.fopf_print_bot_token, parse_mode=ParseMode.HTML))
     GlobalValue[Dispatcher].set(DecoratedDispatcher())
 
     from quantum.bot import fopf_print_bot
@@ -29,13 +29,13 @@ def refill_worker() -> None:
     Этот воркер проходится по id-шникам юкассы и проверяет, была ли по ним совершена оплата
     """
     logger.setLevel(logging.INFO)
-    GlobalValue[Bot].set(Bot(settings.FOPF_PRINT_BOT_TOKEN, parse_mode=ParseMode.HTML))
+    GlobalValue[Bot].set(Bot(settings.fopf_print_bot_token, parse_mode=ParseMode.HTML))
 
     from quantum.services.payments import update_refill_payments
 
     async def aworker() -> None:
         while True:
             await update_refill_payments()
-            await asyncio.sleep(settings.REFILL_WORKER_DELAY_SEC)
+            await asyncio.sleep(settings.refill_worker_delay_sec)
 
     asyncio.run(aworker())

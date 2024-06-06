@@ -42,7 +42,7 @@ async def download_file(
         printing_task_id: UUID,
 ):
     filename: str = f'{printing_task_id}.pdf'
-    filepath: str = f'{settings.FILESTORAGE_PATH}/{filename}'
+    filepath: str = f'{settings.filestorage_path}/{filename}'
 
     if not os.path.isfile(filepath):
         raise HTTPException(status_code=404, detail=f'File not exists: {filepath}')

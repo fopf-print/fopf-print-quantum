@@ -19,7 +19,7 @@ def run_server(port: int):
 
     from quantum.web import app
 
-    GlobalValue[Bot].set(Bot(settings.FOPF_PRINT_BOT_TOKEN, parse_mode=ParseMode.HTML))
+    GlobalValue[Bot].set(Bot(settings.fopf_print_bot_token, parse_mode=ParseMode.HTML))
     uvicorn.run(app, host='0.0.0.0', port=port)
 
 

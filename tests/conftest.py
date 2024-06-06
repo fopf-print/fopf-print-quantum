@@ -44,7 +44,7 @@ async def pg_container_fixture():
 def get_db_fixture(
         pg_container
 ):
-    return Postgres(settings.POSTGRES_CONNECTION_URI)
+    return Postgres(settings.postgres_connection_uri)
 
 
 @pytest.fixture(autouse=True, scope='function', name='init_db')

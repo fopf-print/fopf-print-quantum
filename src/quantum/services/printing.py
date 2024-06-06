@@ -13,12 +13,11 @@ from quantum.entities.printing import PrintingTask, PrintingTaskStatus
 from quantum.entities.web import CompletionStatus
 from quantum.services import client_notification
 
-
 logger = logging.getLogger(__name__)
 
 
 def _get_file_path_by_task_id(task_id: UUID):
-    return f'{settings.FILESTORAGE_PATH}/{task_id}.pdf'
+    return f'{settings.filestorage_path}/{task_id}.pdf'
 
 
 def _get_number_of_pages(filepath: str) -> int:
@@ -39,7 +38,7 @@ async def calculate_cost(task_id: UUID) -> int:
     if pages_amount == -1:
         raise BusinessLogicFucked(msg=['COST_CALCULATION_ERROR'])
 
-    return pages_amount * settings.COST_PER_PAGE_CENTS
+    return pages_amount * settings.cost_per_page_cents
 
 
 async def process_file(user_id: int, file_id: str, message_id: int) -> UUID:
