@@ -10,8 +10,5 @@ REDIRECT_AFTER_PAYMENT_URL = 'https://t.me/ddprivate_bot'
 REFILL_WORKER_DELAY_SEC = 15
 
 FILESTORAGE_PATH = '/path/to/unexisting/folder/'
-<<<<<<< Updated upstream
-=======
 
 COST_PER_PAGE_CENTS = 150  # 1.50руб / стр
->>>>>>> Stashed changes
