@@ -1,9 +1,11 @@
+# секреты инвалидированы (если нет, то скоро будут)
+# актуальные брать из приватной репы
+
 yookassa_api_endpoint = 'https://api.yookassa.ru/v3/'
 
-fopf_print_bot_token = '6584351083:AAEzj1bhJPTwBnnmMsA4bsBs1J9G2CDMYys'
+fopf_print_bot_token = ''
 
-# сервачек с тестовой бд-шкой
-postgres_connection_uri = 'postgresql://fopf:3hnZ2zxE5dQPJ48nhAUjHcGBWf1dLrdR@185.231.153.216:8956/print'
+postgres_connection_uri = ''
 
 redirect_after_payment_url = 'https://t.me/ddprivate_bot'
 

@@ -1,14 +1,13 @@
+# секреты инвалидированы (если нет, то скоро будут)
+# актуальные брать из приватной репы
+
 from ._prod import *  # noqa
 
-yookassa_shop_id = '310974'
-yookassa_api_key = 'test_0pkffmu0d78Jy1dkewpq-L2hw5WyVSDmCCnBcLmtMks'
+yookassa_shop_id = ''
+yookassa_api_key = ''
 
-# postgres_connection_uri = 'postgresql://fopf:fopf@127.0.0.1:8956/print'
-# сервачек с тестовой бд-шкой
-postgres_connection_uri = 'postgresql://fopf:3hnZ2zxE5dQPJ48nhAUjHcGBWf1dLrdR@185.231.153.216:8956/print'
+postgres_connection_uri = ''
 
-# ddprivate
-fopf_print_bot_token = '2102297503:AAHfygRODrR6egsUhqogGEpG-vTCDqYef5A'
-# fopf_print_bot_token = '6584351083:AAEzj1bhJPTwBnnmMsA4bsBs1J9G2CDMYys'
+fopf_print_bot_token = ''
 
 filestorage_path = '/tmp/fopf-print/'
